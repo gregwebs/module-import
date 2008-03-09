@@ -1,3 +1,10 @@
+== Summary
+selectively include module methods
+
+== Author and License
+Copyright (c) 2008 Greg Weber, http://gregweber.info
+Licensed under the MIT license
+
 == Usage
   require 'rubygems'
   require 'module-import'
@@ -38,7 +45,7 @@ However, there is one important difference.  New changes in the included module 
   Importer.new.foo # => 'foo'
 
 == Install
-gem install module_import
+gem install module-import
 
 == Source
 === browser
@@ -55,7 +62,7 @@ included with the gem
 
 == Notes
 === Testing
-3:1 test:code ratio, I think I have all the corner cases covered.  In particular, this does not break inheritance
+4:1 test:code ratio, I think I have all the corner cases covered.  In particular, this does not break inheritance and everything works the same for importing into a module instead of a class.
 
 === Implementation
-Includes a duplicate (#dup) of the module that has methods removed
+Includes a duplicate of the module that has methods removed
