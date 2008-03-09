@@ -1,0 +1,28 @@
+== Usage
+  module Foo
+    def foo; 'foo' end
+    def bar; 'bar' end
+  end
+
+  class Importer
+    import Foo, :bar
+  end
+  Importer.new.bar # => 'bar'
+  Importer.new.foo # => NoMethodError
+
+  class Importer
+    import Foo, :not_defined # => ImportError
+  end
+
+
+Giving no methods (or all methods) should behave the same as a normal include
+
+  class Importer
+    import Foo, :foo, :bar
+  end
+  Importer.new.bar # => 'bar'
+  Importer.new.foo # => 'foo'
+
+TODO:
+However, there is one important difference.  New changes in the included module will not effect the class.
+inheritance does not break

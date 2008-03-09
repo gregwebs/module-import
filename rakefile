@@ -1,0 +1,57 @@
+desc "test"
+task :test do
+  Dir[ 'spec/*' ].each do |file|
+    puts `spec #{file}`
+  end
+end
+
+desc "release a new gem to rubyforge"
+task :release => [:rdoc,:package] do
+  Dir.chdir('pkg') do
+    release = Dir['*.gem'].sort_by {|file| File.mtime(file)}.last
+    release =~ /^[^-]+-([.0-9]+).gem$/
+    `rubyforge login && rubyforge add_release methodchain methodchain #$1 #{release}`
+  end
+end
+
+desc "generate documentation"
+task :rdoc do
+  fail unless system 'rdoc --force-update --quiet README lib/*'
+end
+
+namespace :readme do
+  desc "create html for website using coderay, use --silent option"
+  task :html => :rdoc do
+    require 'hpricot'
+    doc = open( 'doc/files/README.html' ) { |f| Hpricot(f) }
+    # find example code
+    ex = doc.at('#description').search('pre').select {|elem| elem.inner_html =~ /def self\.quicktest/}.first
+    if ex
+      ex.swap("<coderay lang='ruby'>#{ex.inner_html}</coderay>")
+    end
+    # undo what rdoc has done in the example code
+    puts doc.at('#description').to_html.gsub('&quot;', '"')
+  end
+end
+
+require 'rubygems'
+require 'rake/gempackagetask'
+
+spec = Gem::Specification.new do |s|
+  s.name = "methodchain"
+  s.rubyforge_project = "methodchain"
+  s.version = "0.0.5"
+  s.author = "Greg Weber"
+  s.email = "greg@gregweber.info"
+  s.homepage = "http://projects.gregweber.info/methodchain"
+  s.platform = Gem::Platform::RUBY
+  s.summary = "convenience methods for method chaining"
+  s.files = Dir['./**'] + Dir['*/**']
+  s.require_path = "lib"
+  s.has_rdoc = true
+  s.extra_rdoc_files = ["README"]
+end
+
+Rake::GemPackageTask.new(spec) do |pkg|
+  pkg.need_tar = false
+end
