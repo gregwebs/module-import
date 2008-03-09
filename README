@@ -1,4 +1,7 @@
 == Usage
+  require 'rubygems'
+  require 'module-import'
+
   module Foo
     def foo; 'foo' end
     def bar; 'bar' end
@@ -11,18 +14,48 @@
   Importer.new.foo # => NoMethodError
 
   class Importer
-    import Foo, :not_defined # => ImportError
+    import Foo, :not_defined # => #not_defined not found in Foo (ImportError)
   end
 
 
 Giving no methods (or all methods) should behave the same as a normal include
 
-  class Importer
+  class Importer2
     import Foo, :foo, :bar
   end
   Importer.new.bar # => 'bar'
   Importer.new.foo # => 'foo'
 
-TODO:
 However, there is one important difference.  New changes in the included module will not effect the class.
-inheritance does not break
+  module Foo
+    undefine_method :foo
+    def bar; fail end
+  end
+  class Importer2
+    import Foo, :foo, :bar
+  end
+  Importer.new.bar # => 'bar'
+  Importer.new.foo # => 'foo'
+
+== Install
+gem install module_import
+
+== Source
+=== browser
+http://github.com/gregwebs/module-import/tree/master
+
+=== repository
+git clone git://github.com/gregwebs/module-import.git
+
+== Homepage
+http://gregweber.info/projects/module-import.html
+
+== RDoc documentation
+included with the gem
+
+== Notes
+=== Testing
+3:1 test:code ratio, I think I have all the corner cases covered.  In particular, this does not break inheritance
+
+=== Implementation
+Includes a duplicate (#dup) of the module that has methods removed

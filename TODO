@@ -1,3 +1,0 @@
-importing into a class breaks inheritance on unwnated methods
-
-try placing all methods at a class level into an anonymous module and then using module_function or some similiar technique to selectively import them

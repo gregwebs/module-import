@@ -1,7 +1,9 @@
+project = 'module-function'
 desc "test"
 task :test do
   Dir[ 'spec/*' ].each do |file|
     puts `spec #{file}`
+    exit $?.exitstatus if $?.exitstatus != 0
   end
 end
 
@@ -10,7 +12,7 @@ task :release => [:rdoc,:package] do
   Dir.chdir('pkg') do
     release = Dir['*.gem'].sort_by {|file| File.mtime(file)}.last
     release =~ /^[^-]+-([.0-9]+).gem$/
-    `rubyforge login && rubyforge add_release methodchain methodchain #$1 #{release}`
+    `rubyforge login && rubyforge add_release #{project} #{project} #$1 #{release}`
   end
 end
 
@@ -25,7 +27,7 @@ namespace :readme do
     require 'hpricot'
     doc = open( 'doc/files/README.html' ) { |f| Hpricot(f) }
     # find example code
-    ex = doc.at('#description').search('pre').select {|elem| elem.inner_html =~ /def self\.quicktest/}.first
+    ex = doc.at('#description').search('pre').select {|elem| elem.inner_html =~ /class /}.first
     if ex
       ex.swap("<coderay lang='ruby'>#{ex.inner_html}</coderay>")
     end
@@ -38,14 +40,14 @@ require 'rubygems'
 require 'rake/gempackagetask'
 
 spec = Gem::Specification.new do |s|
-  s.name = "methodchain"
-  s.rubyforge_project = "methodchain"
+  s.name = project
+  s.rubyforge_project = project
   s.version = "0.0.5"
   s.author = "Greg Weber"
   s.email = "greg@gregweber.info"
-  s.homepage = "http://projects.gregweber.info/methodchain"
+  s.homepage = "http://projects.gregweber.info/#{project}"
   s.platform = Gem::Platform::RUBY
-  s.summary = "convenience methods for method chaining"
+  s.summary = "selectively import methods from modules"
   s.files = Dir['./**'] + Dir['*/**']
   s.require_path = "lib"
   s.has_rdoc = true
