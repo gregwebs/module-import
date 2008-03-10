@@ -19,7 +19,7 @@ Licensed under the MIT license
     import Foo, :bar
   end
   Importer.new.bar # => 'bar'
-  Importer.new.foo # => NoMethodError
+  Importer.new.foo # => # NoMethodError
 
   class Importer
     import Foo, :not_defined # => #not_defined not found in Foo (ImportError)
@@ -29,21 +29,18 @@ Licensed under the MIT license
 Giving no methods (or all methods) should behave the same as a normal include
 
   class Importer2
-    import Foo, :foo, :bar
+    import Foo # same as import Foo, :foo, :bar
   end
-  Importer.new.bar # => 'bar'
-  Importer.new.foo # => 'foo'
+  Importer2.new.bar # => 'bar'
+  Importer2.new.foo # => 'foo'
 
 However, there is one important difference.  New changes in the included module will not effect the class.
   module Foo
-    undefine_method :foo
+    undef_method :foo
     def bar; fail end
   end
-  class Importer2
-    import Foo, :foo, :bar
-  end
-  Importer.new.bar # => 'bar'
-  Importer.new.foo # => 'foo'
+  Importer2.new.bar # => 'bar'
+  Importer2.new.foo # => 'foo'
 
 == Install
 gem install module-import
