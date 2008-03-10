@@ -2,11 +2,12 @@ class ImportError < Exception; end
 
 module Kernel
 
-  # include a duplicate of the module with all uneeded instance methods removed
+  # abstraction:: only include the methods given by _meths_
+  # implementation:: includes a duplicate of _mod_ with all uneeded instance methods removed
   def import(mod, *meths)
     include_module_copy = lambda do |block|
       mod_dup = mod.dup
-      mod_dup.module_eval &block if block
+      mod_dup.module_eval(&block) if block
       include mod_dup
     end
 
@@ -16,13 +17,13 @@ module Kernel
     else
       # get list of methods to remove module
       ims = mod.instance_methods.map {|m| m.to_sym}
-      if (ims & meths).size != meths.size
+      removes = ims - meths
+      if removes.size != (ims.size - meths.size)
         raise ImportError, "##{(meths - ims).join(' and #')} not found in #{mod}"
       end
-      ims = ims - meths
 
       include_module_copy.call( lambda do
-        ims.each { |meth| remove_method meth }
+        removes.each { |meth| remove_method meth }
       end )
     end
   end

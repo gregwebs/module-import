@@ -1,9 +1,10 @@
 require File.dirname(__FILE__) + '/../lib/import'
 
+# testing helpers
 def module_with_new
   Module.new do
-    def self.new *args
-      (Class.new.send :include, self, *args).new
+    def self.new
+      (Class.new.send :include, self).new
     end
   end
 end
@@ -19,7 +20,7 @@ def class_with_super(superclass)
 end
 
 def class_and_module(times=nil)
-  if !times or times == 1
+  if not times or times == 1
     [Class.new,  module_with_new()]
   else
     [(0...times).map{|i| Class.new}, (0...times).map{|i| module_with_new()}]
@@ -74,13 +75,13 @@ describe "import" do
 
   it 'should not be effected by changes to the module' do
     class_and_module(2).each do |imp,inc|
-      Bar = Module.new do
+      bar = Module.new do
         def foo; 'foo' end
       end
-      bar_orig_ims = Bar.instance_methods
+      bar_orig_ims = bar.instance_methods
 
-      imp.send :import, Bar
-      inc.send :include, Bar
+      imp.send :import, bar
+      inc.send :include, bar
 
       imp.instance_methods.sort.should == inc.instance_methods.sort
       (bar_orig_ims - imp.instance_methods).should be_empty
@@ -91,7 +92,7 @@ describe "import" do
         lambda{k.bar}.should raise_error(NoMethodError)
       end
 
-      Bar.module_eval do
+      bar.module_eval do
         def extra_method; fail end
 
         def bar; 'bar' end
@@ -107,7 +108,7 @@ describe "import" do
       lambda{imp.new.bar}.should raise_error(NoMethodError)
 
       (imp.instance_methods - inc.instance_methods).should == ['foo']
-      (inc.instance_methods - imp.instance_methods).sort.should == (Bar.instance_methods - bar_orig_ims).sort
+      (inc.instance_methods - imp.instance_methods).sort.should == (bar.instance_methods - bar_orig_ims).sort
     end
   end
 
