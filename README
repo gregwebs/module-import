@@ -60,7 +60,7 @@ included with the gem
 
 == Notes
 === Testing
-4:1 test:code ratio, I think I have all the corner cases covered.  In particular, this does not break inheritance and everything works the same for importing into a module instead of a class.
+4:1 test:code ratio, I think I have all the corner cases covered.  In particular, this does not break inheritance and everything works the same for importing into a module as it does for importing into class.
 
 === Implementation
 Includes a duplicate of the module that has methods removed
