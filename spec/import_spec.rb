@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../lib/import'
+require File.dirname(__FILE__) + '/../lib/module-import'
 
 # testing helpers
 def module_with_new

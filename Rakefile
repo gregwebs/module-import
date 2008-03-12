@@ -40,7 +40,7 @@ namespace :test do
       example_file = "#{__DIR__}/example.rb"
 
       File.write(example_file, (
-        File.read("#{__DIR__}/lib/import.rb") << 
+        File.read("#{__DIR__}/lib/module-import.rb") << 
         File.readlines('../README').grep(/^  / ).
           reject {|l| l =~ /^\s*require/ or l.include?('Error')}.
             join ))
@@ -77,7 +77,7 @@ namespace :rcov do
   # rcov is wrong- I am actually at 100%
   RCov::VerifyTask.new(:verify => :rcov) do |t|
     t.threshold = 100 # Make sure you have rcov 0.7 or higher!
-    t.index_html = 'coverage/lib-import_rb.html'
+    t.index_html = 'coverage/lib-module-import_rb.html'
   end
 end
 
@@ -137,13 +137,15 @@ require 'rake/gempackagetask'
 spec = Gem::Specification.new do |s|
   s.name = project
   s.rubyforge_project = project
-  s.version = "0.2.2"
+  s.version = "0.3.0"
   s.author = "Greg Weber"
   s.email = "greg@gregweber.info"
   s.homepage = "http://projects.gregweber.info/#{project}"
   s.platform = Gem::Platform::RUBY
   s.summary = "selectively import methods from modules"
-  s.files = Dir['./**'] + Dir['*/**']
+  s.files = FileList.new('./**', '*/**') do |fl|
+             fl.exclude('pkg','pkg/*','tmp','tmp/*')
+           end
   s.require_path = "lib"
   s.has_rdoc = true
   s.extra_rdoc_files = ["README"]
