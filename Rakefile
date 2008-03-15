@@ -91,7 +91,7 @@ task :release => [:test,:record,:rdoc,:website,:package] do
 end
 
 desc "update website"
-file :website => ['README','rakefile'] do
+file :website => ['README','Rakefile'] do
   Dir.chdir '/home/greg/sites/projects/' do
     (puts (run 'rake projects:update'))
     (puts (run 'rake deploy:rsync'))
@@ -125,7 +125,7 @@ task :record do
   unless `git diff`.chomp.empty?
     ARGV.clear
     puts "enter commit message"
-    (puts (run "git commit -a -m #{Kernel.gets}"))
+    (puts (run "git commit -a -m '#{Kernel.gets}'"))
     puts "committed! now pushing.. "
     (puts (run 'git push origin master'))
   end
@@ -137,7 +137,7 @@ require 'rake/gempackagetask'
 spec = Gem::Specification.new do |s|
   s.name = project
   s.rubyforge_project = project
-  s.version = "0.3.0"
+  s.version = "0.4.0"
   s.author = "Greg Weber"
   s.email = "greg@gregweber.info"
   s.homepage = "http://projects.gregweber.info/#{project}"

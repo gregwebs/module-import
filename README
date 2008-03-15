@@ -1,5 +1,5 @@
 == Summary
-selectively include module methods
+selectively include module methods with Kernel#import
 
 == Author and License
 Copyright (c) 2008 Greg Weber, http://gregweber.info
@@ -41,6 +41,11 @@ However, there is one important difference.  New changes in the included module 
   end
   Importer2.new.bar # => 'bar'
   Importer2.new.foo # => 'foo'
+
+== WARNING!
+There is no way for Kernel#import to track dependencies between methods!  To help with this, by default, all private methods from the module will be imported unless the option :import_private is set to false
+To write a module that works with this system well, your public methods should depend only on private methods.
+To use this on someone else's module, you should either import the full module or write tests or inspect the source code of the module you are importing.
 
 == Install
 gem install module-import

@@ -1,5 +1,4 @@
 require File.dirname(__FILE__) + '/../lib/module-import'
-
 # testing helpers
 def module_with_new
   Module.new do
@@ -27,14 +26,40 @@ def class_and_module(times=nil)
   end
 end
 
+module ModuleDependencies
+  def self.included(mod)
+    mod.module_eval do
+      @@instance_method_dependencies = Hash.new
+    end
+
+    def mod.import_dependencies set=nil
+      if set
+        @@instance_method_dependencies = set
+      else
+        @@instance_method_dependencies
+      end
+    end
+  end
+end
+
 
 # testing uses this module
 module Foo
   def extra_method; fail end
 
-  def foo; 'foo' end
-  def bar; 'bar' end
+  def foo; foo_dependency() end
+  def bar; bar_dependency end
 
+protected
+  def protected_method
+  end
+
+private
+  def foo_dependency; 'foo' end
+  def bar_dependency; 'bar' end
+  def private_extra_method; fail end
+
+public
   def another_extra_method; fail end
 end
 
@@ -62,10 +87,6 @@ describe "import" do
       c.send :import, Foo
       c.new.foo.should == 'foo'
       c.new.bar.should == 'bar'
-
-      b = c.class.new
-      b.send :import, Foo, *(Foo.private_instance_methods)
-      c.instance_methods.sort.should == b.instance_methods.sort
 
       a = c.class.new
       a.send :include, Foo
@@ -132,6 +153,30 @@ describe "import" do
 
       b.class_eval { import Foo, :foo }
       b.new.foo.should == 'foo'
+    end
+  end
+
+  it "should remove private methods when :import_private is false" do
+    class_and_module.each do |a|
+      b = Class.new do
+        import Foo, :foo, :import_private => false
+      end
+      lambda{b.new.foo}.should raise_error(NoMethodError, /foo_dependency/)
+
+      c = Class.new do
+        import Foo, :foo, :foo_dependency, :import_private => false
+      end
+      lambda{c.new.foo}.should_not raise_error
+    end
+  end
+
+  it "should fail when no methods given with :import_private flag" do
+    class_and_module.each do |a|
+      [true,false].each do |tf|
+        lambda{ Class.new do
+          import Foo, :import_private => tf
+        end }.should raise_error(ArgumentError)
+      end
     end
   end
 end
