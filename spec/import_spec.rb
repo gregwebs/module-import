@@ -1,5 +1,7 @@
 require File.dirname(__FILE__) + '/../lib/module-import'
-# testing helpers
+# TODO
+# test and document safeguards against method name clashes
+
 def module_with_new
   Module.new do
     def self.new
@@ -146,7 +148,7 @@ describe "import" do
 
       bo = b.new
       class << bo
-        import(Foo, :foo)
+        import(Foo, :foo, :import_private => false)
       end
       bo.foo.should == 'foo'
       b.new.foo.should == 'super'
