@@ -1,7 +1,5 @@
 require File.dirname(__FILE__) + '/../lib/module-import'
-# TODO
-# test and document safeguards against method name clashes
-
+# testing helpers
 def module_with_new
   Module.new do
     def self.new
@@ -148,7 +146,7 @@ describe "import" do
 
       bo = b.new
       class << bo
-        import(Foo, :foo, :import_private => false)
+        import(Foo, :foo)
       end
       bo.foo.should == 'foo'
       b.new.foo.should == 'super'
@@ -179,6 +177,46 @@ describe "import" do
           import Foo, :import_private => tf
         end }.should raise_error(ArgumentError)
       end
+    end
+  end
+
+  it "should change a private method to public using :as_public" do
+    class_and_module.each do |a|
+      b = Class.new do
+        import Foo, :bar,  [:bar_dependency] => :as_public
+      end
+      b.new.bar.should == 'bar'
+      b.new.bar_dependency.should == 'bar'
+      b = Class.new do
+        import Foo, :bar,  :bar_dependency => :as_public
+      end
+      b.new.bar.should == 'bar'
+      b.new.bar_dependency.should == 'bar'
+    end
+  end
+
+  it "should change a private method to public using :as_private" do
+    class_and_module.each do |a|
+      b = Class.new do
+        import Foo, :bar => :as_private
+      end
+      lambda{b.new.bar_dependency}.should raise_error(NoMethodError)
+      lambda{b.new.bar}.should raise_error(NoMethodError)
+      b = Class.new do
+        import Foo, [:bar] => :as_private
+      end
+      lambda{b.new.bar_dependency}.should raise_error(NoMethodError)
+      lambda{b.new.bar}.should raise_error(NoMethodError)
+    end
+  end
+
+  it "should change a method name using :as_name" do
+    class_and_module.each do |a|
+      b = Class.new do
+        import Foo, :bar => :as_car
+      end
+      lambda{b.new.bar}.should raise_error(NoMethodError)
+      b.new.car.should == 'bar'
     end
   end
 end
