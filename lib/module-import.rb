@@ -55,10 +55,15 @@ module Kernel
               keeps.concat meths
 
             else # don't keep renamed methods
-              meth = meths.pop
+              unless meths.size == 1
+                fail ArgumentError, "cannot alias multiple methods to the same alias"
+              end
+
               m = modifier.to_s
-              m[0..2] == 'as_'
-              alias_method :"#{m[3..-1]}", meth
+              unless m[0..2] == 'as_' && m[3]
+                raise ArgumentError, "expected as_ modifier"
+              end
+              alias_method :"#{m[3..-1]}", meths.first
             end
           end
         end
