@@ -31,6 +31,26 @@ namespace :test do
   end
 end
 
+namespace :readme do
+  desc "create html for website using coderay, use --silent option"
+  task :html do
+    rm_rf 'doc'
+    fail unless system 'rdoc --force-update --quiet README'
+
+    require 'hpricot'
+    require 'htmlentities'
+    doc = open( 'doc/files/README.html' ) { |f| Hpricot(f) }
+    # find example code
+    doc.at('#description').search('pre').
+    select {|elem| elem.inner_html =~ /class |module /}.each do |ex|
+      # add coderay and undo what rdoc has done in the example code
+      ex.swap("<coderay lang='ruby'>#{HTMLEntities.new.decode ex.inner_html}</coderay>")
+    end
+    puts doc.at('#description').to_html
+  end
+end
+                        
+
 require 'rubygems'
 require 'spec/rake/spectask'
 
